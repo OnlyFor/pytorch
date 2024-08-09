@@ -72,7 +72,7 @@ class CppWrapperCpu(WrapperCodeGen):
 
     def generate_kernel_call(
         self,
-        name,
+        kernel_name: str,
         call_args,
         grid=None,
         device_index=None,
@@ -83,6 +83,7 @@ class CppWrapperCpu(WrapperCodeGen):
         grid_fn: str = "grid",
         triton_meta=None,
         grid_extra_kwargs="",
+        autotune_configs=None,
     ):
         """
         Generates kernel call code.
@@ -95,14 +96,17 @@ class CppWrapperCpu(WrapperCodeGen):
         """
         if cuda:
             return super().generate_kernel_call(
-                name,
+                kernel_name,
                 call_args,
                 grid,
                 device_index,
                 cuda,
                 triton,
                 arg_types,
+                raw_args,
                 grid_fn,
+                triton_meta,
+                autotune_configs,
             )
         else:
             if config.abi_compatible:
@@ -120,9 +124,9 @@ class CppWrapperCpu(WrapperCodeGen):
                     else:
                         # arg is a scalar
                         new_args.append(arg)
-                self.writeline(self.wrap_kernel_call(name, new_args))
+                self.writeline(self.wrap_kernel_call(kernel_name, new_args))
             else:
-                self.writeline(self.wrap_kernel_call(name, call_args))
+                self.writeline(self.wrap_kernel_call(kernel_name, call_args))
 
     def write_constant(self, name, hashed):
         # include a hash so our code cache gives different constants different files

@@ -778,7 +778,13 @@ class WrapperCodeGen(CodeGen):
         self.writeline(f"{kernel}({', '.join(args)})")
 
     def generate_user_defined_triton_kernel(
-        self, kernel_name, raw_args, grid, configs, triton_meta, constexprs
+        self,
+        kernel_name: str,
+        raw_args: List[Any],
+        grid: List[Any],
+        configs,
+        triton_meta,
+        constexprs,
     ):
         grid_fn, code = user_defined_kernel_grid_fn_code(
             kernel_name, configs, grid, wrapper=self
@@ -1529,7 +1535,7 @@ class WrapperCodeGen(CodeGen):
 
     def generate_default_grid(
         self,
-        name: str,
+        kernel_name: str,
         grid: List[Any],
         cuda: bool = True,
         grid_callable: Optional[Callable[..., Any]] = None,
@@ -1621,6 +1627,7 @@ class WrapperCodeGen(CodeGen):
         grid_fn: str = "grid",
         triton_meta=None,
         grid_extra_kwargs="",
+        autotune_configs=None,
     ):
         """
         Generates kernel call code.
