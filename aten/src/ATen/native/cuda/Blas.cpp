@@ -201,7 +201,6 @@ static bool isSupportedHipLtROCmArch(int index) {
             return true;
         }
     }
-    TORCH_CHECK(false, "Attempting to use hipBLASLt on a unsupported architecture!");
     return false;
 }
 #endif
