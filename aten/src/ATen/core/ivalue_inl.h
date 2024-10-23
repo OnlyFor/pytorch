@@ -1050,7 +1050,7 @@ struct C10_EXPORT ivalue::Future final : c10::intrusive_ptr_target {
   template <typename T>
   void addCallback(T callback, bool uses_future = true) {
     static_assert(
-        std::is_invocable_r<void, T, Future&>::value,
+        std::is_invocable_r_v<void, T, Future&>,
         "The callback must have signature void(Future&)");
 
     std::unique_lock<std::mutex> lock(mutex_);
@@ -1177,7 +1177,7 @@ struct C10_EXPORT ivalue::Future final : c10::intrusive_ptr_target {
   template<typename T>
   void invokeCallback(T callback, bool uses_future) {
     static_assert(
-        std::is_invocable_r<void, T, Future&>::value,
+        std::is_invocable_r_v<void, T, Future&>,
         "The callback must have signature void(Future&)");
 
     // The synchronization performed below shouldn't be needed when the future
@@ -1790,7 +1790,7 @@ std::vector<Elem> generic_to(IValue ivalue, _fake_type<std::vector<Elem>>) {
 template <typename T>
 c10::intrusive_ptr<T> IValue::toCustomClass() && {
   static_assert(
-      std::is_base_of<torch::CustomClassHolder, T>::value == true,
+      std::is_base_of_v<torch::CustomClassHolder, T> == true,
       "toCustomClass requires that template parameter T must inherit "
       "from torch::CustomClassHolder");
   auto obj = toObject();
@@ -1808,7 +1808,7 @@ c10::intrusive_ptr<T> IValue::toCustomClass() && {
 template <typename T>
 c10::intrusive_ptr<T> IValue::toCustomClass() const& {
   static_assert(
-      std::is_base_of<torch::CustomClassHolder, T>::value == true,
+      std::is_base_of_v<torch::CustomClassHolder, T> == true,
       "toCustomClass requires that template parameter T must inherit "
       "from torch::CustomClassHolder");
   auto obj = toObject();
@@ -1825,7 +1825,7 @@ c10::intrusive_ptr<T> IValue::toCustomClass() const& {
 
 template <typename T>
 T generic_to(IValue ivalue, _fake_type<T>) {
-  using ElemType = typename std::remove_pointer<T>::type::element_type;
+  using ElemType = typename std::remove_pointer_t<T>::element_type;
   return std::move(ivalue).toCustomClass<ElemType>();
 }
 
@@ -1937,7 +1937,7 @@ Tuple generic_to_tuple_impl(
     const ivalue::TupleElements& t,
     std::index_sequence<INDEX...>) {
   return std::make_tuple(
-      t[INDEX].to<typename std::tuple_element<INDEX, Tuple>::type>()...);
+      t[INDEX].to<typename std::tuple_element_t<INDEX, Tuple>>()...);
 }
 } // namespace detail
 
@@ -2485,7 +2485,7 @@ IValue from_(T&& /*x*/, std::false_type) {
 template <typename T>
 IValue from(T&& x) {
   return detail::from_(
-      std::forward<T>(x), typename std::is_constructible<IValue, T>::type{});
+      std::forward<T>(x), typename std::is_constructible_t<IValue, T>{});
 }
 
 } // namespace ivalue
