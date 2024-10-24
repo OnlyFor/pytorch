@@ -1,9 +1,11 @@
 # mypy: allow-untyped-defs
+import copy
 import logging
 from typing import Any, Dict, Optional, Protocol, Tuple, Union
 
 import torch
 from torch._library.utils import parse_namespace
+from torch.utils._python_dispatch import _disable_current_modes
 
 
 log = logging.getLogger(__name__)
@@ -15,7 +17,17 @@ class FakeScriptObject:
 
         # The fully qualified name of the class of original script object
         self.script_class_name = script_class_name
-        self.real_obj = x
+        try:
+            with _disable_current_modes():
+                self.real_obj = copy.deepcopy(x)
+        except Exception as e:
+            log.warning(
+                f"Unable to deepcopy the custom object {script_class_name}. "
+                "Defaulting to the user given object. This might be "
+                "dangerous as side effects may be directly applied "
+                "to the object."
+            )
+            self.real_obj = x
 
 
 class FakeScriptMethod:

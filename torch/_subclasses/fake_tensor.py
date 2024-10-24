@@ -38,6 +38,7 @@ from weakref import ReferenceType
 import torch
 from torch import SymBool, SymFloat, SymInt, Tensor
 from torch._C._functorch import is_functorch_wrapped_tensor, is_legacy_batchedtensor
+from torch._library.fake_class_registry import FakeScriptObject
 from torch._prims_common import suggest_memory_format
 from torch._subclasses.meta_utils import (
     assert_eq,
@@ -1956,6 +1957,8 @@ class FakeTensorMode(TorchDispatchMode):
                         self.shape_env.unbacked_var_to_val
                     )
                 )
+            elif isinstance(t, FakeScriptObject):
+                return t.real_obj
             else:
                 return t
 
